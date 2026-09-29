@@ -84,6 +84,15 @@ class Receptor(ComponenteEnlace):
   def asociar_router(self, id_router):
     self.id_router
 
+  def evaluar(self, senal):
+    recibida = True
+    if senal.potencia < self.umbral_deteccion:
+      recibida = False
+    elif senal.frecuencia_muestreo != self.frecuencia_muestreo:
+      recibida = False
+    return {"recibida": recibida}    
+
+
 
 
 class Señal:
