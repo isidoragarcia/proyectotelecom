@@ -18,9 +18,6 @@ class Transmisor(ComponenteEnlace):
     pass
     
 
-
-
-
 class Canal(ComponenteEnlace):
   def __init__(self, id_componente, ancho_banda, coeficiente_amortiguacion, temperatura) -> None:
     super().__init__(id_componente)
@@ -28,6 +25,13 @@ class Canal(ComponenteEnlace):
     self.coeficiente_amortiguacion = coeficiente_amortiguacion
     self.temperatura = temperatura
     self
+  def recibir_señal(self):
+
+  def degradar_señal(self):
+
+  def inyectar_ruido(self):
+
+  def propagar(self):        
     pass
 
 
