@@ -1,6 +1,14 @@
 class ComponenteEnlace:
-  def __init__(self, id_componente: str):
+  def __init__(self, id_componente: str, estado_encendido: bool):
     self.id_componente = id_componente
+    self.__estado_encendido = True # atributo privado
+
+  def encendido(self, estado_encendido: bool):
+    self.__estado_estado__ = True 
+
+  def apagado(self, estado_encendido: bool):
+    self.__estado_estado__ = False
+
 
 class Transmisor(ComponenteEnlace):
   def __init__(self, id_componente, potencia_transmision, ancho_banda, frecuencia_muestreo) -> None:
@@ -9,8 +17,7 @@ class Transmisor(ComponenteEnlace):
     self.potencia_transmision = potencia_transmision
     self.ancho_banda = ancho_banda
     self.frecuencia_muestreo = frecuencia_muestreo
-  def procesar(self):
-    ??
+    pass
     
 
 
