@@ -3,11 +3,8 @@ class ComponenteEnlace:
     self.id_componente = id_componente
     self.__estado_encendido = True # atributo privado
 
-  def encendido(self, estado_encendido: bool):
-    self.__estado_estado__ = True 
-
-  def apagado(self, estado_encendido: bool):
-    self.__estado_estado__ = False
+  def accionar_breaker(self, estado_encendido: bool):
+    self.estado_estado = not self.estado_estado
 
 
 class Transmisor(ComponenteEnlace):
