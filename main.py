@@ -5,7 +5,6 @@ class ComponenteEnlace:
 
   def accionar_breaker(self, estado_encendido: bool):
     self.estado_estado = not self.estado_estado
-    print(f"[{self.id_componente}] Estado de conexión: {self.conectado}")
 
 
 class Transmisor(ComponenteEnlace):
@@ -18,6 +17,9 @@ class Transmisor(ComponenteEnlace):
     pass
     
 
+
+
+
 class Canal(ComponenteEnlace):
   def __init__(self, id_componente, ancho_banda, coeficiente_amortiguacion, temperatura) -> None:
     super().__init__(id_componente)
@@ -25,13 +27,6 @@ class Canal(ComponenteEnlace):
     self.coeficiente_amortiguacion = coeficiente_amortiguacion
     self.temperatura = temperatura
     self
-  def recibir_señal(self):
-
-  def degradar_señal(self):
-
-  def inyectar_ruido(self):
-
-  def propagar(self):        
     pass
 
 
@@ -40,7 +35,12 @@ class Enrutador(ComponenteEnlace):
     super().__init__(id_componente)
     self.tabla_rutas = tabla_rutas
     self.vecinos = vecinos
+  def agregar_Ruta(red_destino, siguiente_salto):
     pass
+  def buscar_siguiente_salto(ip_destino):
+    pass
+  def procesar(paquete):
+    pass 
 
 
 class Receptor(ComponenteEnlace):
