@@ -60,6 +60,7 @@ class Enrutador(ComponenteEnlace):
     canal.unir(self, otro)
     self.canales[otro.id_componente] = canal
     otro.canales[self.id_componente] = canal   # si "otro" es otro Enrutador o un Receptor con este atributo
+    self.agregar_ruta(otro.id_componente, [self.id_componente, otro.id_componente])
 
   def buscar_siguiente_salto(self, ip_destino: str) -> str:
     if ip_destino not in self.__tabla_ip:
@@ -81,9 +82,12 @@ class Receptor(ComponenteEnlace):
     self.ancho_banda = ancho_banda
     self.frecuencia_muestreo = frecuencia_muestreo
     self.umbral_deteccion = umbral_deteccion
-  def asociar_router(self, id_router):
-    self.id_router
-
+    self.canales = {}
+    
+  def procesar(self, senal, ip_destino):
+    resultado = self.evaluar(senal)
+    return resultado
+  
   def evaluar(self, senal):
     recibida = True
     if senal.potencia < self.umbral_deteccion:
@@ -101,4 +105,3 @@ class Señal:
     self.potencia = potencia
     self.frecuencia_muestreo = frecuencia_muestreo
     self.datos = datos
-
