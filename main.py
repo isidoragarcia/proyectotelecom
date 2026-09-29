@@ -5,6 +5,7 @@ class ComponenteEnlace:
 
   def accionar_breaker(self, estado_encendido: bool):
     self.estado_estado = not self.estado_estado
+    print(f"[{self.id_componente}] Estado de conexión: {self.conectado}")
 
 
 class Transmisor(ComponenteEnlace):
