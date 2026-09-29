@@ -35,10 +35,15 @@ class Enrutador(ComponenteEnlace):
     super().__init__(id_componente)
     self.tabla_rutas = tabla_rutas
     self.vecinos = vecinos
-  def agregar_ruta(self, destino, camino):
+  def agregar_ruta(self, destino: str, camino: str) -> bool:
     """Guarda el camino si es nuevo. Devuelve true si cambió algo, false si no se añadió"""
-    self.__tabla_rutas[red_destino]=siguiente_salto
-    pass
+    if self.id_componente in camino[1:]:          # evita bucles
+      return False
+    if destino not in self.tabla_rutas:
+      self.tabla_rutas[destino] = camino
+      return True
+    return False
+  
   def buscar_siguiente_salto(self, ip_destino: str) -> str:
     if ip_destino not in self.__tabla_ip:
       raise KeyError(f"{self.obtener_id()} no tiene ruta hacia {ip_destino}")
