@@ -14,10 +14,9 @@ class Transmisor(ComponenteEnlace):
     self.potencia_transmision = potencia_transmision
     self.ancho_banda = ancho_banda
     self.frecuencia_muestreo = frecuencia_muestreo
-    pass
-    
-
-
+  def transmitir(self, senal,  ip_origen:int, ip_destino:int):
+    self.ip_origen=ip_origen
+    self.ip_destino=ip_destino
 
 
 class Canal(ComponenteEnlace):
@@ -27,7 +26,8 @@ class Canal(ComponenteEnlace):
     self.coeficiente_amortiguacion = coeficiente_amortiguacion
     self.temperatura = temperatura
     self
-    pass
+  def deteriorar(senal):
+    senal.potencia -= #definir valor en base a coef amortiguacion, temperatura, ancho de banda
 
 
 class Enrutador(ComponenteEnlace):
@@ -35,10 +35,14 @@ class Enrutador(ComponenteEnlace):
     super().__init__(id_componente)
     self.tabla_rutas = tabla_rutas
     self.vecinos = vecinos
-  def agregar_Ruta(red_destino, siguiente_salto):
+  def agregar_ruta(self, destino, camino):
+    """Guarda el camino si es nuevo. Devuelve true si cambió algo, false si no se añadió"""
+    self.__tabla_rutas[red_destino]=siguiente_salto
     pass
-  def buscar_siguiente_salto(ip_destino):
-    pass
+  def buscar_siguiente_salto(self, ip_destino: str) -> str:
+    if ip_destino not in self.__tabla_ip:
+      raise KeyError(f"{self.obtener_id()} no tiene ruta hacia {ip_destino}")
+    return self.__tabla_ip[ip_destino]
   def procesar(paquete):
     pass 
 
@@ -49,7 +53,9 @@ class Receptor(ComponenteEnlace):
     self.ancho_banda = ancho_banda
     self.frecuencia_muestreo = frecuencia_muestreo
     self.umbral_deteccion = umbral_deteccion
-    pass
+  def asociar_router(self, id_router):
+    self.id_router
+
 
 
 class Señal:
@@ -58,4 +64,4 @@ class Señal:
     self.potencia = potencia
     self.frecuencia_muestreo = frecuencia_muestreo
     self.datos = datos
-    pass
+
