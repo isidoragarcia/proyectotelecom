@@ -3,9 +3,6 @@ class ComponenteEnlace:
     self.id_componente = id_componente
     self.__estado_encendido = True # atributo privado
 
-  def accionar_breaker(self, estado_encendido: bool):
-    self.estado_estado = not self.estado_estado
-
 
 class Transmisor(ComponenteEnlace):
   def __init__(self, id_componente, potencia_transmision, ancho_banda, frecuencia_muestreo) -> None:
@@ -37,7 +34,7 @@ class Canal(ComponenteEnlace):
   def unir(self, a, b):
     self.extremo_a = a
     self.extremo_b = b
-    
+
   def enviar(self, senal, ip_destino, desde):
     # si viene de A va hacia B, y al revés
     hacia = self.extremo_b if desde is self.extremo_a else self.extremo_a
