@@ -14,10 +14,13 @@ class Transmisor(ComponenteEnlace):
     self.potencia_transmision = potencia_transmision
     self.ancho_banda = ancho_banda
     self.frecuencia_muestreo = frecuencia_muestreo
-  def enlazar(self, router):
-    
+  def conectar(self, router):
+    self.router = router
+    return router
   def transmitir(self, senal, ip_destino:int):
-    self.ip_destino=ip_destino
+    if self.router is None:
+      print("Error, no estás conectado.")
+    self.router.procesar(senal, ip_destino)
 
 
 
@@ -28,9 +31,18 @@ class Canal(ComponenteEnlace):
     self.coeficiente_amortiguacion = coeficiente_amortiguacion
     self.temperatura = temperatura
     self
-  def deteriorar(senal):
-    senal.potencia -= #definir valor en base a coef amortiguacion, temperatura, ancho de banda
+  def deteriorar(self, senal):
+    senal.potencia *= (1-self.coeficiente_amortiguacion)#definir valor en base a coef amortiguacion, temperatura, ancho de banda
 
+  def unir(self, a, b):
+    self.extremo_a = a
+    self.extremo_b = b
+    
+  def enviar(self, senal, ip_destino, desde):
+    # si viene de A va hacia B, y al revés
+    hacia = self.extremo_b if desde is self.extremo_a else self.extremo_a
+    self.deteriorar(senal)
+    return hacia.procesar(senal, ip_destino)
 
 class Enrutador(ComponenteEnlace):
   def __init__(self, id_componente, tabla_rutas, vecinos) -> None:
@@ -51,8 +63,11 @@ class Enrutador(ComponenteEnlace):
       raise KeyError(f"{self.obtener_id()} no tiene ruta hacia {ip_destino}")
     return self.__tabla_ip[ip_destino]
   
-  def procesar(paquete):
-    pass 
+  def procesar(self, senal, ip_destino):
+    siguiente = self.buscar_siguiente_salto(ip_destino)
+    print(f"{self.id_componente} recibió señal para {ip_destino}, la reenvía a {siguiente}")
+    # aquí después la mandas al siguiente router o al receptor
+
 
 
 class Receptor(ComponenteEnlace):
