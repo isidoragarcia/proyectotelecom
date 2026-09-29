@@ -8,27 +8,47 @@ class Transmisor(ComponenteEnlace):
   def __init__(self, id_componente, potencia_transmision, ancho_banda, frecuencia_muestreo) -> None:
     # 1. Llamamos al constructor del padre para que configure el id_componente
     super().__init__(id_componente)
-    self.potencia_transmision = potencia_transmision
-    self.ancho_banda = ancho_banda
-    self.frecuencia_muestreo = frecuencia_muestreo
+    self.__potencia_transmision = potencia_transmision
+    self.__ancho_banda = ancho_banda
+    self.__frecuencia_muestreo = frecuencia_muestreo
+    self.canal = None
+
+  @property
+  def potencia_transmision(self):
+    return self.__potencia_transmision
+
+  @property
+  def ancho_banda(self):
+    return self.__ancho_banda
+
+  @property
+  def frecuencia_muestreo(self):
+    return self.__frecuencia_muestreo
+
   def conectar(self, canal, router):
     canal.unir(self, router)
     self.canal = canal
-  def transmitir(self, senal, ip_destino:int):
+  def transmitir(self, datos, ip_destino):
     if self.canal is None:
       print("Error, no estás conectado.")
       return
-    self.canal.enviar(senal, ip_destino, self)
+    senal = Señal(duracion=1, potencia=self.__potencia_transmision,
+                  frecuencia_muestreo=self.__frecuencia_muestreo, datos=datos)
+    return self.canal.enviar(senal, ip_destino, self)
 
 
 
 class Canal(ComponenteEnlace):
   def __init__(self, id_componente, ancho_banda, coeficiente_amortiguacion, temperatura) -> None:
     super().__init__(id_componente)
-    self.ancho_banda = ancho_banda
+    self.__ancho_banda = ancho_banda
     self.coeficiente_amortiguacion = coeficiente_amortiguacion
     self.temperatura = temperatura
-    self
+
+  @property
+  def ancho_banda(self):
+    return self.__ancho_banda
+
   def deteriorar(self, senal):
     senal.potencia *= (1-self.coeficiente_amortiguacion)#definir valor en base a coef amortiguacion, temperatura, ancho de banda
 
@@ -79,11 +99,19 @@ class Enrutador(ComponenteEnlace):
 class Receptor(ComponenteEnlace):
   def __init__(self, id_componente,ancho_banda, frecuencia_muestreo, umbral_deteccion) -> None:
     super().__init__(id_componente)
-    self.ancho_banda = ancho_banda
-    self.frecuencia_muestreo = frecuencia_muestreo
+    self.__ancho_banda = ancho_banda
+    self.__frecuencia_muestreo = frecuencia_muestreo
     self.umbral_deteccion = umbral_deteccion
     self.canales = {}
-    
+
+  @property
+  def ancho_banda(self):
+    return self.__ancho_banda
+
+  @property
+  def frecuencia_muestreo(self):
+    return self.__frecuencia_muestreo
+
   def procesar(self, senal, ip_destino):
     resultado = self.evaluar(senal)
     return resultado
@@ -92,7 +120,7 @@ class Receptor(ComponenteEnlace):
     recibida = True
     if senal.potencia < self.umbral_deteccion:
       recibida = False
-    elif senal.frecuencia_muestreo != self.frecuencia_muestreo:
+    elif senal.frecuencia_muestreo != self.__frecuencia_muestreo:
       recibida = False
     return {"recibida": recibida}    
 
