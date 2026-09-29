@@ -14,9 +14,11 @@ class Transmisor(ComponenteEnlace):
     self.potencia_transmision = potencia_transmision
     self.ancho_banda = ancho_banda
     self.frecuencia_muestreo = frecuencia_muestreo
-  def transmitir(self, senal,  ip_origen:int, ip_destino:int):
-    self.ip_origen=ip_origen
+  def enlazar(self, router):
+    
+  def transmitir(self, senal, ip_destino:int):
     self.ip_destino=ip_destino
+
 
 
 class Canal(ComponenteEnlace):
@@ -48,6 +50,7 @@ class Enrutador(ComponenteEnlace):
     if ip_destino not in self.__tabla_ip:
       raise KeyError(f"{self.obtener_id()} no tiene ruta hacia {ip_destino}")
     return self.__tabla_ip[ip_destino]
+  
   def procesar(paquete):
     pass 
 
