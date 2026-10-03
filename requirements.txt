@@ -1,0 +1,4 @@
+# Dependencias del proyecto.
+# Por ahora el simulador solo usa la biblioteca estándar de Python (3.10+),
+# así que no hay paquetes que instalar. Agregar aquí cada biblioteca externa
+# que se use (por ejemplo: numpy), una por línea.
