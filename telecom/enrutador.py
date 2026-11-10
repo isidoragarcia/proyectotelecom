@@ -1,3 +1,4 @@
+from telecom.componente import ComponenteEnlace
 class Enrutador(ComponenteEnlace):
   def __init__(self, id_componente, tabla_rutas=None, vecinos=None) -> None:
     super().__init__(id_componente)
