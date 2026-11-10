@@ -1,4 +1,4 @@
-numpy>=1.24
-matplotlib>=3.7
-pytest>=7.0
-flake8>=6.0
+# Dependencias del proyecto.
+# Por ahora el simulador solo usa la biblioteca estándar de Python (3.10+),
+# así que no hay paquetes que instalar. Agregar aquí cada biblioteca externa
+# que se use (por ejemplo: numpy), una por línea.
