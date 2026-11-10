@@ -1,86 +1,61 @@
-# Simulador de un Enlace de Telecomunicaciones con Enrutamiento
+# Simulador de Enlace de Telecomunicaciones — EL4203 (Opción C)
 
-Proyecto semestral del curso **EL4203 Programación Avanzada**, Departamento de Ingeniería Eléctrica, Universidad de Chile (Primavera 2026).
+Simulación de un enlace de extremo a extremo con dos capas:
 
-Simulador en Python, orientado a objetos, que modela el envío de una señal desde un **transmisor** hasta un **receptor**, pasando por **canales** que la atenúan y por **enrutadores** que deciden el siguiente salto a partir de tablas de rutas construidas de forma distribuida.
+- **Capa lógica:** los paquetes se rutean salto a salto por una red de
+  enrutadores con tablas IP/MAC implementadas como **Tablas Hash** (`dict`),
+  y cada paquete queda en un **registro histórico ordenado** donde se audita
+  con **búsqueda binaria**.
+- **Capa física:** el paquete que llega a destino se transmite como una señal
+  (suma de tonos piloto) que pasa **obligatoriamente** por el `CanalFisico`,
+  donde sufre **atenuación log-distancia** y **ruido térmico kTBF**. El
+  `Receptor` analiza la señal sucia con **FFT (`numpy.fft`)**, detecta los
+  tonos y estima la SNR.
 
-> **Estado:** Hito 1 (arquitectura). La implementación de los métodos está en desarrollo, así que algunos archivos de la estructura de abajo todavía no existen.
-
----
-
-## Componentes
-
-| Clase | Rol |
-|---|---|
-| `ComponenteEnlace` | Clase abstracta base. Guarda el identificador único de cada componente. |
-| `Senal` | Lleva los datos y la IP de destino, junto con su potencia y su frecuencia de muestreo. |
-| `Transmisor` | Genera la señal y la envía por su canal. |
-| `Canal` | Une dos componentes y atenúa la señal según su coeficiente de amortiguación. |
-| `Enrutador` | Mantiene una tabla de rutas y reenvía la señal al siguiente salto. |
-| `Receptor` | Acepta la señal si supera el umbral de detección y si su frecuencia de muestreo coincide con la propia. |
-
-Las tablas de rutas se construyen con una variante de **Bellman–Ford distribuido** (vector de caminos). La métrica es el número de saltos, y se descartan los caminos que formarían bucles.
-
-## Estructura del repositorio
-
-Estructura objetivo del proyecto:
+## Estructura
 
 ```
-proyectotelecom/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── src/
-│   ├── componente_enlace.py
-│   ├── senal.py
-│   ├── transmisor.py
-│   ├── canal.py
-│   ├── enrutador.py
-│   ├── receptor.py
-│   └── main.py            # escenario de simulación de ejemplo
-├── tests/                 # pruebas unitarias (pytest)
-└── docs/                  # diagramas UML y de flujo, informes de cada hito
-```
-
-## Requisitos
-
-- Python 3.10 o superior
-- Conda (recomendado) o `venv`
-
-## Instalación
-
-```bash
-git clone https://github.com/isidoragarcia/proyectotelecom.git
-cd proyectotelecom
-
-conda create -n progra_avanzada python=3.10 -y
-conda activate progra_avanzada
-pip install -r requirements.txt
+proyecto_telecom/
+├── main.py                  # Simulación completa + gráficos
+├── telecom/
+│   ├── componente.py        # ComponenteEnlace (superclase abstracta)
+│   ├── transmisor.py        # Transmisor
+│   ├── canal.py             # CanalFisico (atenuación + ruido)
+│   ├── receptor.py          # Receptor (FFT, detección, SNR)
+│   ├── enrutador.py         # Enrutador (tablas Hash IP/MAC)
+│   ├── registro.py          # RegistroPaquetes (búsqueda binaria)
+│   ├── enlace.py            # EnlaceTelecom (clase gestora, composición)
+│   ├── datos.py             # Paquete, Senal, ResultadoEspectral
+│   └── graficos.py          # Gráficos estándar IEEE
+├── benchmarks/complejidad.py  # Mediciones Big-O para el informe
+├── tests/test_telecom.py      # Pruebas unitarias
+├── docs/                      # UML (Mermaid + PNG) y guía de hitos
+└── resultados/                # PDFs generados
 ```
 
 ## Uso
 
 ```bash
-python src/main.py     # ejecuta el escenario de simulación
-pytest                 # ejecuta las pruebas
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+python main.py                                   # escenario base (1 km)
+python main.py --distancia 5000 --paquetes 1000  # otro escenario
+python -m benchmarks.complejidad                 # gráficos Big-O
+python -m pytest                                 # pruebas
+flake8 .                                         # verificación PEP8
 ```
 
-## Flujo de trabajo con Git
+## Modelo físico
 
-- `main` contiene siempre una versión estable.
-- Cada funcionalidad se desarrolla en su propia rama (`feature/enrutador`, `feature/receptor`, …).
-- Los cambios entran a `main` mediante *pull requests* revisados por el otro integrante.
-- El código sigue PEP8 e incluye *docstrings* y anotaciones de tipo, indicando las unidades físicas.
+| Magnitud | Expresión | Valor base |
+|---|---|---|
+| Pérdida de trayecto | PL(d) = 20·log10(4π·d0/λ) + 10·n·log10(d/d0) | n = 3.5, fc = 2.4 GHz |
+| Ruido térmico | N = k·T·B·F | T = 290 K, B = 8 kHz, NF = 6 dB |
+| Potencia por tono | A = √(2P/K) | P = 1 W, K = 4 tonos |
+| Espectro | P_k = 2·\|X_k\|² / N² | fs = 20 kHz, N = 2000 |
 
-## Hitos
-
-- [x] **Hito 1 – Arquitectura:** diagrama de clases, diagramas de flujo y repositorio.
-- [ ] **Hito 2 – Algoritmia:** implementación, ruido en el canal, buffer FIFO y análisis de complejidad.
-- [ ] **Entrega final:** informe y defensa.
-
-## Autores
-
-- Isidora García
-- *[Nombre de tu compañero/a]*
-
-Profesor de cátedra: Jonas Peñailillo P. · Profesor auxiliar: Lucas Marshall R.
+Con n = 2 la pérdida se reduce a la fórmula de Friis (espacio libre). La SNR
+estimada por FFT coincide con la teórica (Pt − PL − N) con un error menor a
+0.5 dB (verificado en `tests/`).

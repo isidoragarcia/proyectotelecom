@@ -1,0 +1,142 @@
+classDiagram
+    direction TB
+
+    class ComponenteEnlace {
+        <<abstract>>
+        -str __id_componente
+        -bool __en_servicio
+        +obtener_id() str
+        +esta_en_servicio() bool
+        +poner_en_servicio()
+        +poner_fuera_de_servicio()
+        #_verificar_servicio()
+        +procesar(entrada)* Any
+    }
+
+    class Transmisor {
+        -float __potencia_tx_w
+        -float __frecuencia_muestreo_hz
+        -float __ancho_banda_hz
+        -ndarray __frecuencias_tono_hz
+        -float __duracion_simbolo_s
+        +obtener_potencia_tx() float
+        +ajustar_potencia_tx(potencia_w)
+        +ajustar_muestreo(fs, ancho_banda)
+        +ajustar_tonos(frecuencias_hz)
+        +generar_senal(duracion_s) Senal
+        +procesar(paquete) Senal
+    }
+
+    class CanalFisico {
+        -float __distancia_m
+        -float __frecuencia_portadora_hz
+        -float __ancho_banda_hz
+        -float __exponente_perdida
+        -float __temperatura_k
+        -float __figura_ruido_db
+        -Generator __generador
+        +ajustar_distancia(distancia_m)
+        +calcular_perdida_db(distancias_m) float
+        +calcular_potencia_ruido_w() float
+        -__aplicar_atenuacion(muestras, distancias) ndarray
+        -__aplicar_ruido_termico(muestras) ndarray
+        +procesar(senal) Senal
+        +procesar_barrido(senal, distancias_m) ndarray
+    }
+
+    class Receptor {
+        -float __frecuencia_muestreo_hz
+        -float __sensibilidad_dbm
+        -float __umbral_deteccion_db
+        +calcular_espectro(muestras) tuple
+        +detectar_tonos(potencia_w) ndarray
+        +estimar_snr_db(potencia_w, mascara) ndarray
+        +procesar(senal) ResultadoEspectral
+        +procesar_lote(matriz) ndarray
+    }
+
+    class Enrutador {
+        -str __ip_propia
+        -dict __tabla_ip
+        -dict __tabla_mac
+        -int __paquetes_procesados
+        +agregar_ruta(red_destino, siguiente_salto)
+        +aprender_mac(mac, puerto)
+        +buscar_siguiente_salto(ip_destino) str
+        +buscar_puerto(mac) int
+        +procesar(paquete) str
+    }
+
+    class EnlaceTelecom {
+        -Transmisor __transmisor
+        -CanalFisico __canal
+        -Receptor __receptor
+        -dict __enrutadores
+        -RegistroPaquetes __registro
+        -ResultadoEspectral __ultimo_resultado
+        +agregar_enrutador(enrutador)
+        +enviar_paquete(paquete, id_entrada) EntradaRegistro
+        +simular_barrido_distancias(distancias_m) ndarray
+    }
+
+    class RegistroPaquetes {
+        -list __entradas
+        -list __ids
+        +registrar(entrada)
+        +buscar_binaria_recursiva(id) EntradaRegistro
+        +buscar_binaria_iterativa(id) EntradaRegistro
+        +buscar_secuencial(id) EntradaRegistro
+        +contar_errores() dict
+    }
+
+    class Paquete {
+        <<dataclass>>
+        +int id_paquete
+        +str ip_origen
+        +str ip_destino
+        +str mac_destino
+        +int ttl
+        +str carga_util
+    }
+
+    class Senal {
+        <<dataclass>>
+        +ndarray muestras
+        +float frecuencia_muestreo_hz
+        +potencia_media_w() float
+    }
+
+    class ResultadoEspectral {
+        <<dataclass>>
+        +ndarray frecuencias_hz
+        +ndarray potencia_w
+        +ndarray tonos_detectados_hz
+        +float snr_db
+        +bool enlace_valido
+    }
+
+    class EntradaRegistro {
+        <<dataclass>>
+        +int id_paquete
+        +str estado
+        +tuple ruta
+        +float snr_db
+    }
+
+    ComponenteEnlace <|-- Transmisor
+    ComponenteEnlace <|-- CanalFisico
+    ComponenteEnlace <|-- Receptor
+    ComponenteEnlace <|-- Enrutador
+
+    EnlaceTelecom *-- "1" Transmisor
+    EnlaceTelecom *-- "1" CanalFisico
+    EnlaceTelecom *-- "1" Receptor
+    EnlaceTelecom o-- "1..*" Enrutador
+    EnlaceTelecom *-- "1" RegistroPaquetes
+    RegistroPaquetes *-- "0..*" EntradaRegistro
+
+    Transmisor ..> Paquete : recibe
+    Transmisor ..> Senal : genera
+    CanalFisico ..> Senal : degrada
+    Receptor ..> ResultadoEspectral : produce
+    Enrutador ..> Paquete : rutea
