@@ -1,15 +1,17 @@
 from telecom.componente import ComponenteEnlace
 from telecom.senal import Señal
+from telecom.cola import ColaFIFO
 
 
 class Transmisor(ComponenteEnlace):
-  def __init__(self, id_componente, potencia_transmision, ancho_banda, frecuencia_muestreo) -> None:
+  def __init__(self, id_componente, potencia_transmision, ancho_banda, frecuencia_muestreo, capacidad_buffer=None) -> None:
     # 1. Llamamos al constructor del padre para que configure el id_componente
     super().__init__(id_componente)
     self.__potencia_transmision = potencia_transmision
     self.__ancho_banda = ancho_banda
     self.__frecuencia_muestreo = frecuencia_muestreo
     self.canal = None
+    self.__buffer = ColaFIFO(capacidad_buffer)   # paquetes esperando salir
 
   @property
   def potencia_transmision(self):
@@ -26,6 +28,20 @@ class Transmisor(ComponenteEnlace):
   def conectar(self, canal, router):
     canal.unir(self, router)
     self.canal = canal
+
+  def encolar(self, datos, ip_destino) -> bool:
+    """Deja un paquete esperando en el buffer. Devuelve False si está lleno."""
+    return self.__buffer.encolar((datos, ip_destino))
+
+  def pendientes(self) -> int:
+    return len(self.__buffer)
+
+  def despachar(self):
+    """Transmite el paquete más antiguo del buffer (orden FIFO).
+    Devuelve (datos, resultado)."""
+    datos, ip_destino = self.__buffer.desencolar()
+    return datos, self.transmitir(datos, ip_destino)
+
   def transmitir(self, datos, ip_destino):
     if self.canal is None:
       print("Error, no estás conectado.")
