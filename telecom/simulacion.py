@@ -32,9 +32,9 @@ MAC_RECEPTOR = "aa:bb:cc:00:03:14"
 
 
 def construir_enlace(distancia_m: float = DISTANCIA_M):
-    """Construye la cadena fisica y la red de tres enrutadores en serie.
+    """Construye la cadena física y la red de tres enrutadores en serie.
 
-    Topologia:  [TX] -- R1 -- R2 -- R3 -- [RX]
+    Topología:  [TX] -- R1 -- R2 -- R3 -- [RX]
     """
     transmisor = Transmisor("TX-01", POTENCIA_TX_W, ANCHO_BANDA_HZ,
                             FRECUENCIA_MUESTREO_HZ)
@@ -67,7 +67,7 @@ def construir_enlace(distancia_m: float = DISTANCIA_M):
     canal_r3_rx = Canal("C-R3-RX", ANCHO_BANDA_HZ, COEF_AMORTIGUACION,
                         TEMPERATURA_K, tramo)
 
-    # Conectar TX -> R1 y R3 -> RX (los enrutadores entre si)
+    # Conectar TX -> R1 y R3 -> RX (los enrutadores entre sí)
     transmisor.conectar(canal_tx_r1, r1)
     r1.conectar(r2, canal_r1_r2)
     r2.conectar(r3, canal_r2_r3)
@@ -95,7 +95,7 @@ def generar_trafico(cantidad: int, semilla: int):
 
 
 def ejecutar() -> None:
-    """Ejecuta la simulacion completa y muestra el reporte por consola."""
+    """Ejecuta la simulación completa y muestra el reporte por consola."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--distancia", type=float, default=DISTANCIA_M,
                         help="Largo total del enlace [m] (defecto: 1000)")
@@ -122,7 +122,7 @@ def ejecutar() -> None:
     for p in paquetes:
         registro.registrar(p["id"], p["ip_destino"], True, 1.0)
 
-    # Auditoria: busqueda binaria recursiva sobre ids concretos
+    # Auditoria: búsqueda binaria recursiva sobre ids concretos
     objetivos = (1, len(paquetes) // 2, args.paquetes, args.paquetes + 99)
     print("Auditoria con busqueda binaria recursiva:")
     for objetivo in objetivos:
@@ -134,7 +134,7 @@ def ejecutar() -> None:
                   f"ip_destino={entrada['ip_destino']}")
 
     print("-" * 62)
-    print("Simulacion finalizada correctamente.")
+    print("Simulación finalizada correctamente.")
 
 
 if __name__ == "__main__":

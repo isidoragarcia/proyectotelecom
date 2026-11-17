@@ -6,7 +6,7 @@ class Enrutador(ComponenteEnlace):
 
     Mantiene una tabla hash privada de rutas (destino -> siguiente salto)
     y un diccionario privado de canales hacia vecinos. El acceso a ambos
-    se realiza exclusivamente mediante metodos publicos, garantizando el
+    se realiza exclusivamente mediante métodos publicos, garantizando el
     encapsulamiento del estado interno.
     """
 
@@ -17,9 +17,9 @@ class Enrutador(ComponenteEnlace):
         # Diccionario privado: vecino_id -> objeto Canal
         self.__canales = {}
 
-    # ------------------------------------------------------------------
+    
     # Acceso controlado al estado privado (encapsulamiento)
-    # ------------------------------------------------------------------
+    
     def obtener_canal(self, vecino_id: str):
         """Devuelve el canal hacia un vecino, o None si no esta conectado."""
         return self.__canales.get(vecino_id)
@@ -28,15 +28,15 @@ class Enrutador(ComponenteEnlace):
         """Registra un canal hacia un vecino (uso interno entre enrutadores)."""
         self.__canales[vecino_id] = canal
 
-    # ------------------------------------------------------------------
+    
     # Tabla de rutas (Hash)
-    # ------------------------------------------------------------------
+    
     def agregar_ruta(self, destino: str, camino) -> bool:
         """Registra el siguiente salto hacia `destino`.
 
         `camino` puede ser:
-          - una lista [origen, siguiente_salto, ...] (uso interno de conectar)
-          - un string con el ID del siguiente salto (uso desde main)
+          - Una lista [origen, siguiente_salto, ...] (uso interno de conectar)
+          - Un string con el ID del siguiente salto (uso desde main)
         Devuelve True si la ruta es nueva.
         """
         if isinstance(camino, str):
@@ -58,9 +58,9 @@ class Enrutador(ComponenteEnlace):
             raise KeyError(f"{self.id_componente} no tiene ruta hacia {ip_destino}")
         return self.__tabla_ip[ip_destino]
 
-    # ------------------------------------------------------------------
+    
     # Topologia y procesamiento
-    # ------------------------------------------------------------------
+    
     def conectar(self, otro, canal):
         """Conecta este enrutador con `otro` a traves de `canal`."""
         canal.unir(self, otro)
@@ -71,12 +71,12 @@ class Enrutador(ComponenteEnlace):
                           [self.id_componente, otro.id_componente])
 
     def procesar(self, senal, ip_destino):
-        """Procesa una senal: la entrega si es local o la reenvia."""
+        """Procesa una senal: la entrega si es local o la reenvía."""
         if ip_destino == self.id_componente:
             print(f"{self.id_componente}: la senal llego, potencia {senal.potencia}")
             return senal
 
-        # Usamos la busqueda O(1) de la tabla hash
+        # Usamos la búsqueda O(1) de la tabla hash
         siguiente_salto = self.buscar_siguiente_salto(ip_destino)
         canal = self.obtener_canal(siguiente_salto)
         if canal is None:

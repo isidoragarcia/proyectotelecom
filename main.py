@@ -1,4 +1,4 @@
-"""Punto de entrada del simulador de telecomunicaciones (EL4203 - Op. C)."""
+"""Punto de entrada del simulador de telecomunicaciones """
 
 from telecom.simulacion import ejecutar
 
