@@ -8,6 +8,7 @@ main.py mediante ejecutar().
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 
 import numpy as np
 
@@ -39,7 +40,7 @@ def construir_enlace(distancia_m: float = DISTANCIA_M):
     transmisor = Transmisor("TX-01", POTENCIA_TX_W, ANCHO_BANDA_HZ,
                             FRECUENCIA_MUESTREO_HZ)
     receptor = Receptor("RX-01", ANCHO_BANDA_HZ, FRECUENCIA_MUESTREO_HZ,
-                        UMBRAL_DETECCION_W)
+                        UMBRAL_DETECCION_W, MAC_RECEPTOR)
 
     r1 = Enrutador("R1", "10.0.1.1")
     r2 = Enrutador("R2", "10.0.2.1")
@@ -57,7 +58,7 @@ def construir_enlace(distancia_m: float = DISTANCIA_M):
     r3.agregar_ruta("10.0.3.0/24", "R3")
 
     # Canales fisicos entre cada par (con distancia del tramo)
-    tramo = distancia_m / 3.0
+    tramo = distancia_m / 4.0   # son cuatro canales: TX-R1, R1-R2, R2-R3 y R3-RX
     canal_tx_r1 = Canal("C-TX-R1", ANCHO_BANDA_HZ, COEF_AMORTIGUACION,
                         TEMPERATURA_K, tramo)
     canal_r1_r2 = Canal("C-R1-R2", ANCHO_BANDA_HZ, COEF_AMORTIGUACION,
@@ -71,7 +72,7 @@ def construir_enlace(distancia_m: float = DISTANCIA_M):
     transmisor.conectar(canal_tx_r1, r1)
     r1.conectar(r2, canal_r1_r2)
     r2.conectar(r3, canal_r2_r3)
-    canal_r3_rx.unir(r3, receptor)
+    r3.conectar_host(receptor, canal_r3_rx, IP_RECEPTOR)
 
     return transmisor, receptor, [r1, r2, r3]
 
@@ -116,11 +117,27 @@ def ejecutar() -> None:
     print(f"Receptor             : {receptor.id_componente}")
     print("-" * 62)
 
-    # Registrar paquetes en el historial (ids crecientes -> ordenado)
-    registro = RegistroPaquetes()
+    # Los paquetes esperan en el buffer FIFO del transmisor
     paquetes = generar_trafico(args.paquetes, args.semilla)
     for p in paquetes:
-        registro.registrar(p["id"], p["ip_destino"], True, 1.0)
+        transmisor.encolar(p, p["ip_destino"])
+
+    # Se transmiten en orden de llegada y se registra el resultado real.
+    # Como la cola es FIFO, los ids llegan crecientes y el registro queda
+    # ordenado, que es lo que necesita la busqueda binaria.
+    registro = RegistroPaquetes()
+    while transmisor.pendientes() > 0:
+        paquete, resultado = transmisor.despachar()
+        registro.registrar(paquete["id"], paquete["ip_destino"],
+                           resultado["recibida"], resultado["potencia"],
+                           resultado["motivo"])
+
+    errores = registro.buscar_errores()
+    print(f"Paquetes recibidos   : {len(paquetes) - len(errores)}")
+    print(f"Paquetes con error   : {len(errores)}")
+    for motivo, cantidad in sorted(Counter(e["motivo"] for e in errores).items()):
+        print(f"  {motivo:<28}: {cantidad}")
+    print("-" * 62)
 
     # Auditoria: busqueda binaria recursiva sobre ids concretos
     objetivos = (1, len(paquetes) // 2, args.paquetes, args.paquetes + 99)
@@ -130,8 +147,9 @@ def ejecutar() -> None:
         if entrada is None:
             print(f"  Paquete #{objetivo}: no existe en el registro")
         else:
+            estado = "recibido" if entrada["recibida"] else entrada["motivo"]
             print(f"  Paquete #{objetivo}: id={entrada['id']} "
-                  f"ip_destino={entrada['ip_destino']}")
+                  f"ip_destino={entrada['ip_destino']} estado={estado}")
 
     print("-" * 62)
     print("Simulacion finalizada correctamente.")
