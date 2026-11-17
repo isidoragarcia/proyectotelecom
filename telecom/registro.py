@@ -2,13 +2,14 @@ class RegistroPaquetes:
   def __init__(self) -> None:
     self.__entradas = []   # lista ordenada por id (atributo privado)
 
-  def registrar(self, id_paquete: int, ip_destino: str, recibida: bool, potencia: float) -> None:
+  def registrar(self, id_paquete: int, ip_destino: str, recibida: bool, potencia: float, motivo: str = None) -> None:
     """Agrega un paquete al historial. Los ids deben llegar en orden creciente,
     así la lista queda ordenada sin tener que ordenarla (evita O(n log n))."""
     if self.__entradas and id_paquete <= self.__entradas[-1]["id"]:
       raise ValueError("Los ids deben ser crecientes")
     self.__entradas.append({"id": id_paquete, "ip_destino": ip_destino,
-                            "recibida": recibida, "potencia": potencia})
+                            "recibida": recibida, "potencia": potencia,
+                            "motivo": motivo})
 
   def buscar_secuencial(self, id_paquete: int):
     """Revisa uno por uno: O(n)."""
